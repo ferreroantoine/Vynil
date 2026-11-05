@@ -23,4 +23,3 @@ data object Leaderboard : NavKey
 
 enum class MainTab { HOME, SEARCH, PROFILE, LEADERBOARD }
 
-// AppButton

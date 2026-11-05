@@ -43,7 +43,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            VynilAppMain()
+            MyApplicationTheme {
+                VynilAppMain()
+            }
         }
     }
 }
