@@ -1,5 +1,6 @@
 package com.example.myapplication.presentation
 
+import android.media.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -8,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import com.example.myapplication.app.AppButton
 import com.example.myapplication.data.repository.TrackRepository
 import com.example.myapplication.data.repository.TrackRepositoryImpl
@@ -28,16 +30,6 @@ fun HomePage(trackRepository: TrackRepository = TrackRepositoryImpl()) {
             .padding(Margin.l),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Vynil",
-            style = TextStyleTheme.title
-        )
 
-        AppButton(
-            text = "Lancer un blind test",
-            maxWidth = true,
-        ) {
-
-        }
     }
 }
