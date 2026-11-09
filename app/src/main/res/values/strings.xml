@@ -2,8 +2,13 @@
     <string name="app_name">My Application</string>
     <string name="home_title">On commence à deviner !</string>
     <string name="home_profile">Profil</string>
-    <string name="home_create_lobby">Créer un lobby</string>
     <string name="nav_home">Accueil</string>
-    <string name="nav_explore">Explorer</string>
-    <string name="nav_leaderboard">Leaderboard</string>
+    <string name="nav_search">Recherche</string>
+    <string name="nav_library">Bibliothèque</string>
+    <string name="nav_create">Créer</string>
+    <string name="nav_close_create_menu">Fermer le menu de création</string>
+    <string name="create_menu_blind_test_title">Blind test</string>
+    <string name="create_menu_blind_test_description">Crée ton propre blind test.</string>
+    <string name="create_menu_lobby_title">Lobby</string>
+    <string name="create_menu_lobby_description">Crée un lobby et joue avec tes amis.</string>
 </resources>

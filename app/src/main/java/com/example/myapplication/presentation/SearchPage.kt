@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.myapplication.R
@@ -78,7 +80,10 @@ private val browseAll = listOf(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchPage(trackRepository: TrackRepository = TrackRepositoryImpl()) {
+fun SearchPage(
+    bottomPadding: Dp,
+    trackRepository: TrackRepository = TrackRepositoryImpl()
+) {
     var query by rememberSaveable { mutableStateOf("") }
     var result by remember { mutableStateOf<Resource<List<Track>>?>(null) }
     val scope = rememberCoroutineScope()
@@ -146,7 +151,10 @@ fun SearchPage(trackRepository: TrackRepository = TrackRepositoryImpl()) {
 
         if (query.isNotBlank() || result != null) {
             when (val currentResult = result) {
-                is Resource.Success -> LazyColumn(modifier = Modifier.padding(top = Margin.s)) {
+                is Resource.Success -> LazyColumn(
+                    modifier = Modifier.padding(top = Margin.s),
+                    contentPadding = PaddingValues(bottom = bottomPadding)
+                ) {
                     items(currentResult.data, key = { it.id }) { track ->
                         TrackItem(track)
                     }
@@ -163,6 +171,7 @@ fun SearchPage(trackRepository: TrackRepository = TrackRepositoryImpl()) {
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(bottom = bottomPadding),
                 verticalArrangement = Arrangement.spacedBy(Margin.m)
             ) {
                 item {
