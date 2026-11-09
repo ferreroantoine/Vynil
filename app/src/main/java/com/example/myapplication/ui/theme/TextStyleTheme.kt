@@ -9,8 +9,7 @@ object TextStyleTheme {
 
     val body = TextStyle(
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        color = ColorTheme.textPrimary
+        fontSize = 12.sp
     )
 
     val title = TextStyle(
@@ -27,7 +26,6 @@ object TextStyleTheme {
 
     val cardTitle = TextStyle(
         fontWeight = FontWeight.Normal,
-        fontSize = 18.sp,
-        color = ColorTheme.textPrimary
+        fontSize = 18.sp
     )
 }
