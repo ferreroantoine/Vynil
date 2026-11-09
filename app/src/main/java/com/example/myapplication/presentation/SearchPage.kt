@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,9 +22,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -41,11 +44,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.myapplication.R
 import com.example.myapplication.data.Track
 import com.example.myapplication.data.repository.TrackRepository
@@ -55,6 +62,8 @@ import com.example.myapplication.ui.theme.AppRadius
 import com.example.myapplication.ui.theme.ColorTheme
 import com.example.myapplication.ui.theme.Margin
 import com.example.myapplication.ui.theme.TextStyleTheme
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 private data class CategoryItem(
@@ -86,22 +95,47 @@ fun SearchPage(
 ) {
     var query by rememberSaveable { mutableStateOf("") }
     var result by remember { mutableStateOf<Resource<List<Track>>?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
+    var searchJob by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
 
-    val searchCategory: (String) -> Unit = { categoryName ->
-        query = categoryName
-        scope.launch {
-            result = try {
-                Resource.Success(trackRepository.searchTracks(categoryName))
-            } catch (e: Exception) {
-                Resource.Error("Erreur de chargement : ${e.message}")
+    val clearSearch: () -> Unit = {
+        searchJob?.cancel()
+        isLoading = false
+        result = null
+    }
+
+    val launchSearch: (String) -> Unit = { searchedText ->
+        focusManager.clearFocus()
+        if (searchedText.isBlank()) {
+            clearSearch()
+        } else {
+            searchJob?.cancel()
+            isLoading = true
+            searchJob = scope.launch {
+                try {
+                    result = Resource.Success(trackRepository.searchTracks(searchedText))
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    result = Resource.Error("Erreur de chargement : ${e.message}")
+                }
+                isLoading = false
             }
         }
     }
 
+    val searchCategory: (String) -> Unit = { categoryName ->
+        query = categoryName
+        launchSearch(categoryName)
+    }
+
     Column(modifier = Modifier.padding(Margin.l)) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = Margin.l, bottom = Margin.s),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Margin.s)
         ) {
@@ -120,25 +154,18 @@ fun SearchPage(
         SearchBar(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = Margin.s),
+                .padding(top = Margin.s, bottom = Margin.xl),
+            windowInsets = WindowInsets(0, 0, 0, 0),
             inputField = {
                 SearchBarDefaults.InputField(
                     query = query,
                     onQueryChange = {
                         query = it
                         if (it.isBlank()) {
-                            result = null
+                            clearSearch()
                         }
                     },
-                    onSearch = {
-                        scope.launch {
-                            result = try {
-                                Resource.Success(trackRepository.searchTracks(it))
-                            } catch (e: Exception) {
-                                Resource.Error("Erreur de chargement : ${e.message}")
-                            }
-                        }
-                    },
+                    onSearch = launchSearch,
                     expanded = false,
                     onExpandedChange = { },
                     placeholder = { Text("Artistes, musiques...") },
@@ -149,14 +176,30 @@ fun SearchPage(
             onExpandedChange = { }
         ) { }
 
-        if (query.isNotBlank() || result != null) {
+        if (isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Margin.l),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+        } else if (result != null) {
             when (val currentResult = result) {
-                is Resource.Success -> LazyColumn(
-                    modifier = Modifier.padding(top = Margin.s),
-                    contentPadding = PaddingValues(bottom = bottomPadding)
-                ) {
-                    items(currentResult.data, key = { it.id }) { track ->
-                        TrackItem(track)
+                is Resource.Success -> if (currentResult.data.isEmpty()) {
+                    Text(
+                        text = "Aucun résultat",
+                        modifier = Modifier.padding(top = Margin.s)
+                    )
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.padding(top = Margin.s),
+                        contentPadding = PaddingValues(bottom = bottomPadding)
+                    ) {
+                        items(currentResult.data, key = { it.id }) { track ->
+                            TrackItem(track)
+                        }
                     }
                 }
 
@@ -284,8 +327,29 @@ private fun CategoryCard(
 
 @Composable
 fun TrackItem(track: Track) {
+    val coverPlaceholder = painterResource(R.drawable.logo)
+    val subtitle = listOfNotNull(track.artist?.name, track.album?.title).joinToString(" • ")
+
     ListItem(
-        headlineContent = { Text(track.title) },
-        supportingContent = { Text("${track.artist?.name} • ${track.album?.title}") }
+        leadingContent = {
+            AsyncImage(
+                model = track.album?.coverMedium,
+                contentDescription = track.album?.title,
+                placeholder = coverPlaceholder,
+                error = coverPlaceholder,
+                fallback = coverPlaceholder,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(RoundedCornerShape(AppRadius.m))
+            )
+        },
+        headlineContent = {
+            Text(track.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        },
+        supportingContent = {
+            Text(subtitle, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        },
+        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.background)
     )
 }
