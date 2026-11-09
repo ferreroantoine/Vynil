@@ -21,5 +21,8 @@ data object Profile : NavKey
 @Serializable
 data object Leaderboard : NavKey
 
-enum class MainTab { HOME, SEARCH, PROFILE, LEADERBOARD }
+@Serializable
+data object Library : NavKey
+
+enum class MainTab { HOME, SEARCH, LIBRARY, PROFILE, LEADERBOARD }
 
