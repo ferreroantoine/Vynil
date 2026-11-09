@@ -21,5 +21,5 @@ class TrackRepositoryImpl(
         deezerService.getTrack(idTrack)
 
     override suspend fun searchTracks(query: String): List<Track> =
-        deezerService.searchTracks(query).trackList
+        deezerService.searchTracks(query).trackList.distinctBy { it.id }
 }
