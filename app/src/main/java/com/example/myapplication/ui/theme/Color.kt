@@ -12,6 +12,7 @@ object ColorTheme {
     val Pink40 = Color(0xFF7D5260)
 
     val logoGreen = Color(0xFF569F4C)
+    val lightGreen = Color(0xFF87FB78)
 
     val backgroundPrimary = logoGreen
     val textPrimary = Purple40
