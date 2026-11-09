@@ -100,7 +100,11 @@ fun VynilAppMain(){
                 MainTab.HOME -> NavDisplay(
                     backStack = homeBackStack,
                     entryProvider = entryProvider {
-                        entry<Home>{HomePage()}
+                        entry<Home> {
+                            HomePage(
+                                onProfileClick = { selectedTab = MainTab.PROFILE }
+                            )
+                        }
                     }
                 )
                 MainTab.SEARCH -> NavDisplay(
