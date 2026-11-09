@@ -1,9 +1,16 @@
 <resources>
     <string name="app_name">My Application</string>
+    <string name="home_welcome">Content de te revoir !</string>
+    <string name="home_notifications">Notifications</string>
     <string name="home_title">On commence à deviner !</string>
     <string name="home_profile">Profil</string>
     <string name="home_create_lobby">Créer un lobby</string>
     <string name="nav_home">Accueil</string>
     <string name="nav_explore">Explorer</string>
     <string name="nav_leaderboard">Leaderboard</string>
+    <string name="profile_score_global">Score global</string>
+    <string name="profile_followers">Abonnés</string>
+    <string name="profile_following">Abonnements</string>
+    <string name="profile_recent_blindtests">Derniers blindtests joués</string>
+    <string name="profile_created_blindtests">Mes blindtests créés</string>
 </resources>
